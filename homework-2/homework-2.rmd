@@ -1,0 +1,70 @@
+---
+title: "Homework 2"
+output: html_document
+---
+
+```{r include = FALSE, echo = FALSE}
+# Libraries needed
+library(tidyverse)
+library(patchwork)
+library(palmerpenguins)
+
+# global datasets and variables needed
+mpg <- ggplot2::mpg
+penguins <- palmerpenguins::penguins
+```
+
+# Task 1
+
+Using the mpg dataset, compare and contrast the following plots. These plots should be displayed next to each other.
+
+This two plots compare the `city miles per gallon` (`cty`) with the `highway miles per gallon` (`hwy`) with two different displaying methods:
+`geom_point` and `geom_count`.
+```{r}
+# create both plots
+plot1 <- ggplot(data = mpg, aes(x = cty, y = hwy)) + geom_point()
+plot2 <- ggplot(data = mpg, aes(x = cty, y = hwy)) + geom_count()
+
+# combine them with the `patchwork` library
+plot1 + plot2
+```
+
+# Task 2
+Using the `palmerpenguins::penguins` dataset, explain whether there is any problem with the graph below, and eventually propose a solution.
+
+```{r}
+# inital plot
+ggplot(data = penguins, aes(fill = island, x = species)) + geom_bar(aes(y = after_stat(prop)))
+```
+This plot seems only to show the islands inhabited by the different penguin species.
+We are not able to see how big each population is and do not get any further information.
+
+Proposed solution: Make a plot to show the distribution of one species on the islands with a barchart
+```{r}
+ggplot(penguins, aes(species, fill = island)) +
+  geom_bar() +
+  geom_text(aes(label = after_stat(count), y = after_stat(count)), stat = "count", vjust = 1.5)
+```
+
+# Task 3
+To visualyze the distribution of the weight of diamonds with respect to their color, we have the following options:
+
+## Facet the histogram on weight
+```{r}
+ggplot(diamonds, aes(x = carat)) + geom_histogram(bins = 30) + facet_wrap(~ color, ncol = 2)
+```
+
+## Superpose the density plots
+```{r}
+ggplot(diamonds, aes(x = carat, fill = color)) + geom_density()
+```
+
+## Display boxplots
+```{r}
+ggplot(diamonds, aes(x = color, y = carat)) + geom_boxplot()
+```
+
+## Use violin plots
+```{r}
+ggplot(diamonds, aes(x = color, y = carat)) + geom_violin()
+```
