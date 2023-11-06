@@ -39,8 +39,8 @@ Using the `palmerpenguins::penguins` dataset, explain whether there is any probl
 p1 <- ggplot(data = penguins, aes(fill = island, x = species)) + geom_bar(aes(y = after_stat(prop)), show.legend = FALSE) + ggtitle('Inital plot')
 
 # proposed solution
-p2 <- ggplot(penguins, aes(species, fill = island)) +
-  geom_bar() +
+p2 <- ggplot(penguins, aes(species)) +
+  geom_bar(aes(fill = island)) +
   geom_text(aes(label = after_stat(count), y = after_stat(count)), stat = "count", vjust = 1.5) + ggtitle('Proposed solution')
 
 p1 + p2

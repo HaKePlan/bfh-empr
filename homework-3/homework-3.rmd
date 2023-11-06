@@ -1,0 +1,121 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+```{r include = FALSE, echo = FALSE}
+# Libraries needed
+library(nycflights13)
+
+```
+
+# Task 1
+
+Using a single pipeline and `nycflights13::flights`, figure out the number of days on which the temperature
+was at least 30°C at JFK-Airport, broken down by month. Do these months correspond to what you expected?
+
+```{r}
+flights |>
+  merge(weather, by = intersect(names(flights), names(weather))) |>
+  filter(origin=="JFK") |>
+  filter(temp >= 86.00) |>  # 86°F == 30°C, temp is in F
+  distinct(year, month, day) |>
+  group_by(month) |>
+  count(month)
+```
+
+The result shows us 2 days in July, 14 in June, 2 in August and 1 in September.
+This sem to match the average temperature per month in NYC.
+
+# Task 2
+Using a single pipeline and `nycflights13::flights`,
+figure out December flights missing `arr_time` and get all other variables the flights missing `arr_time` are also missing.
+What might these rows represent?
+
+```{r}
+flights |>
+  filter((month == 12) & (is.na(arr_time))) |>
+  summarize(across(everything(), ~ sum(is.na(.))))
+```
+
+The correlated variables are `dep_time`, `dep_delay`, `arr_time`, `arr_delay`, `tailnum`, and `air_time`.
+- `dep_time` and `dep_delay` have the same count and could tell us, that the flight did not happen in 2013.
+- `arr_time`, `arr_delay`, and `air_time` have the same count and could tell us, that the departed flights did not arrive in 2013
+- `tailnum` could tell us, that the flights where planned but the plane could not be assigned
+
+For a more detailed and possible better answer we would have to investigate the concrete dates. Only then we could validate the three proposed cases.
+Overall it looks like the `NA` variables are due to the year change and could be resolved with the data for 2014.
+
+# Task 3
+Select all variables from `nycflights13::weather` except those between year and hour.
+Use this selection to solve the tasks `a)`, `b)` and `c)` below.
+For the diagrams in `a)` and `b)`, label the months with their full name.
+For the diagram in `c)`, use number to label the months.
+
+```{r}
+sel_weather <- weather |>
+  select(!(year:hour))
+```
+The selection seems to be wrong and not suited for the following tasks.
+In the following tasks we need to use the excluded variables.
+But for the sake of this homework, lets do this.
+
+## a)
+Display the distribution of the temperature faceted on months.
+
+```{r}
+# since we need the month variable (which we exclueded before in the selection), we use here the original weather dataset
+adj_weather <- weather
+adj_weather$month_name <- month.name[adj_weather$month]
+
+ggplot(adj_weather, aes(x = temp)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  facet_wrap(~ month_name, ncol = 3) +
+  labs(title = "Temperature Distribution by Month", x = "Temperature (°C)", y = "Frequency")
+```
+
+## b)
+Use `ggridges::geom_density_ridges()` to get a plot similar to the one in a).
+
+```{r}
+# since we need the month variable (which we exclueded before in the selection), we use here the original weather dataset
+adj_weather <- weather
+adj_weather$month_name <- month.name[adj_weather$month]
+
+ggplot(adj_weather, aes(x = temp, y = month_name)) +
+  geom_density_ridges(fill = "blue", color = "black") +
+  labs(title = "Temperature Distribution by Month", x = "Temperature (°C)", y = "Month") +
+  scale_y_discrete(labels = month.name) +
+  theme_ridges() +
+  theme(legend.position = "none")
+```
+
+## c)
+Aggregate your data into average monthly temperature, including their standard deviation.
+Use the aggregated data and geom_line() to display monthly average temperature
+surrounded by the ±2 · s / √n upper and lower 95% confidence lines,
+where s is a monthly standard deviation and n the √ number of observation per month.
+
+```{r}
+aggregated_weather <- adj_weather |>
+  group_by(month) |>
+  filter(!is.na(temp)) |>
+  summarize(
+    mean_temp = mean(temp),
+    std_dev = sd(temp),
+    n = n()
+  ) |>
+  mutate(
+    upper_limit = mean_temp + 2 * (std_dev / sqrt(n)),
+    lower_limit = mean_temp - 2 * (std_dev / sqrt(n))
+  )
+
+ggplot(aggregated_weather, aes(x = month, y = mean_temp)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower_limit, ymax = upper_limit), fill = "blue", alpha = 0.3) +
+  labs(title = "Monthly Average Temperature with 95% Confidence Intervals",
+       x = "Month",
+       y = "Average Temperature (°C)")
+```
+
+
