@@ -1,11 +1,18 @@
 ---
-title: "R Notebook"
-output: html_document
+title: "Homework 2"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r include = FALSE, echo = FALSE}
 # Libraries needed
 library(nycflights13)
+library(ggplot2)
+library(ggridges)
+library(readxl)
+library(dlookr)
+library(tidyverse)
 
 ```
 
@@ -118,4 +125,30 @@ ggplot(aggregated_weather, aes(x = month, y = mean_temp)) +
        y = "Average Temperature (°C)")
 ```
 
+# Task 4
+[Data_HW3.xlsx](./Data_HW3.xlsx) has in the sheet `small sample`
+some data collected on BFH-W 3rd semester students a couple of years ago.
+Most of the variables are self explaining.
 
+- `foot` gives foot size measured in cm without shoes.
+- `hair` is the length of respondent’s longest hair measured in cm.
+- `transport` is the main method of transport used by the respondent to get to the BFH.
+- `cash` (CHF) gives how much money cash in CHF the student had with her/him at the time she/he was filling the survey.
+
+- Import this data into R and inspect it. Describe any problem you notice and propose a solution for it.
+- Save the cleaned data as `.csv` in your R-project directory.
+
+```{r results = FALSE}
+data_hw3 <- read_excel("./Data_HW3.xlsx")
+
+# as I have learnd in SBD2: lets use diagnose from dlookr
+overview(data_hw3)
+diagnose(data_hw3)
+
+# diagnose shows us that we have some NA values inside the dataset. since they are just a few, we just remove them.
+clean_hw3 <- data_hw3 |>
+        drop_na()
+
+# lets write the new dataset to output
+write.csv(clean_hw3, file = "./cleaned_data_Homework_3.csv")
+```
