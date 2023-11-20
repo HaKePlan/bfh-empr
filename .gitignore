@@ -51,3 +51,7 @@ po/*~
 rsconnect/
 
 **/.DS_Store
+**.log
+**.tex
+**.Rproj
+**.pdf

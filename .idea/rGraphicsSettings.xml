@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="RGraphicsSettings">
-    <option name="height" value="848" />
+    <option name="height" value="825" />
     <option name="imageNumber" value="12" />
     <option name="outputDirectory" value="$PROJECT_DIR$/homework-1" />
     <option name="resolution" value="75" />
     <option name="version" value="2" />
-    <option name="width" value="896" />
+    <option name="width" value="895" />
   </component>
 </project>

@@ -1,0 +1,56 @@
+---
+title: "Homework 4"
+author: "Severin Clauss"
+date: Nov. 19, 2023
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r include = FALSE, echo = FALSE}
+# Install libraries needed
+libraries <- c('readxl', 'ggplot2', 'forcats', 'tidyverse', 'patchwork')
+
+lapply(libraries, function(x) if (!(x %in% installed.packages())) {
+  install.packages(x)
+})
+
+lapply(libraries, library, quietly = TRUE, character.only = TRUE)
+
+if (basename(getwd()) != "homework-4") {
+  setwd("./homework-4")
+}
+
+
+# read the dataset
+dataImprot <- read_excel('./Data_HW4.xlsx')
+data <- dataImprot
+```
+
+# Task 1
+*`Data_HW4.xlsx` contains data collected from BFH-W 3rd semester students. See `Data_Collection.pdf`. Use your EDA-skills to explore and summarize your findings.*
+
+For this task, we decided to take first a dive into the data of the transportation. The first question in our mind was: Which transportation is used the most? And next, we would like to know the mean distance per transportation?
+```{r}
+# what is the most used transportaition?
+viz_transport <- ggplot(data = data, aes(x = fct_infreq(transport), fill = transport)) +
+        geom_bar() +
+        coord_polar() +
+        labs(title = 'Frequency of transportation used', y = '', x = '')
+
+# now we can see, that the most come by train followed by bus and then car.
+# so what are the distances here for the ones by car, bus or train?
+viz_distance <- data |>
+        aggregate(distance ~ transport, mean) |>
+        ggplot(aes(
+                x = reorder(transport, distance, decreasing = TRUE),
+                y = distance,
+                fill = transport
+        )) +
+        geom_bar(stat = "identity", color = "white", show.legend = FALSE) +
+        labs(title = 'Mean distance by transportation', x = '')
+
+# plot both visualizations at once to have a nice comparison
+viz_transport + viz_distance
+```
+
+# Task 2
