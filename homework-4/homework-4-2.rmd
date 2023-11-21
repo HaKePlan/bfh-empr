@@ -1,0 +1,93 @@
+---
+title: "Homework 4 - Exploratory Data Analysis"
+subtitle: "Part 2 - Individually"
+author: "Severin Clauss"
+date: Nov. 19, 2023
+output: pdf_document
+fontsize: 12pt
+---
+
+```{r include = FALSE, echo = FALSE}
+# Install libraries needed
+libraries <- c('tidyverse', 'ggplot2')
+
+lapply(libraries, function(x) if (!(x %in% installed.packages())) {
+  install.packages(x)
+})
+
+lapply(libraries, library, quietly = TRUE, character.only = TRUE)
+
+if (basename(getwd()) != "homework-4") {
+  setwd("./homework-4")
+}
+```
+
+*`anscombe` illustrates how graphs are essential to good statistical analysis. These data are from four samples of eleven observations each. The index of x and y represents the corresponding sample. For example, the first observation in sample 1 has the x-value 10 and the y-value 8.04, and the first observation in sample 2 has the x-value 10 and the y-value 9.14.*
+
+# A)
+*Explain briefly why this dataset is not tidy. In a single pipeline, transform it to get a tidy-dataset with exactly three variables: sample, x and y. Do not output the tidy-dataset, but save it for future use.*
+
+The dataset is not tidy because it violates the principles of tidy data, which include:
+
+- Each variable forms a column.
+- Each observation forms a row.
+- Each type of observational unit forms a table.
+
+```{r}
+anscombe_data_tidy <- anscombe |>
+  pivot_longer(cols = everything(),
+               names_to = c(".value", "sample"),
+               names_pattern = "([xy])(\\d)") |>
+  arrange(sample)
+```
+
+\pagebreak
+# B)
+*In a single pipeline, use the tidy-data from [a)](#a) to get a scatterplot that includes a line of best fit for y on x. The sample should be distinguished by color and shape. Use only the shapes 0, 1, 2 and 5.*
+
+```{r}
+anscombe_data_tidy |>
+        ggplot(aes(x = x, y = y, color = factor(sample), shape = factor(sample))) +
+          geom_point() +
+          geom_smooth(method = "lm", se = FALSE) +
+          scale_shape_manual(values = c(0, 1, 2, 5)) +
+          labs(title = "Scatterplot with Line of Best Fit",
+             x = "X Values",
+             y = "Y Values",
+             color = "Sample",
+             shape = "Sample")
+```
+
+\pagebreak
+# C)
+*In a single pipeline, summarize the tidy-data from [a)](#a) to get the means, standard deviations and correlation coeﬃcients.*
+
+```{r}
+anscombe_data_tidy |>
+        group_by(sample) |>
+        summarise(
+                mean_x = mean(x),
+                mean_y = mean(y),
+                sd_x = sd(x),
+                sd_y = sd(y),
+                corr_xy = cor(x, y)
+        )
+```
+
+# D)
+*In a single pipeline, use facet_grid() to display the scatter plots per sample (including lines of the best fit), and summarize the main message on your plot.*
+
+```{r}
+anscombe_data_tidy |>
+  ggplot(aes(x = x, y = y, color = factor(sample))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  facet_grid(. ~ sample) +
+  labs(title = "Scatterplots with Lines of Best Fit per Sample",
+       x = "X Values",
+       y = "Y Values",
+       color = "Sample") +
+  theme_minimal()
+```
+
+The main message of this plot is to emphasize how different datasets can have similar summary statistics (mean, standard deviation, correlation) but exhibit different patterns when visualized.
