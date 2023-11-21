@@ -28,3 +28,24 @@ viz_distance <- data |>
 # seems to make sence
 viz_transport + viz_distance
 
+# does have the transportaion influence on the sleep?
+# lets check first for outliers
+ggplot(data, aes(x = sleep)) +
+  geom_boxplot()
+
+# the outliers are not to bad and we leav them in
+
+data |>
+  aggregate(sleep ~ transport, mean) |>
+  ggplot(aes(x = reorder(transport, sleep, decreasing = TRUE), y = sleep, fill = transport)) +
+  geom_bar(stat = "identity", color = "white", show.legend = FALSE)
+
+ggplot(data, aes(x = transport, y = sleep, fill = transport)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Sleep distribution over transportation",
+       x = "Sleep",
+       y = "Transport")
+
+
+

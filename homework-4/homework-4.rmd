@@ -1,9 +1,10 @@
 ---
-title: "Homework 4"
+title: "Homework 4 - Exploratory Data Analysis"
+subtitle: "Part 1 - Group work"
 author: "Severin Clauss"
 date: Nov. 19, 2023
 output: pdf_document
-fontsize: 10pt
+fontsize: 12pt
 ---
 
 ```{r include = FALSE, echo = FALSE}
@@ -26,10 +27,13 @@ dataImprot <- read_excel('./Data_HW4.xlsx')
 data <- dataImprot
 ```
 
-# Task 1
+# Exploratory Data Analysis
 *`Data_HW4.xlsx` contains data collected from BFH-W 3rd semester students. See `Data_Collection.pdf`. Use your EDA-skills to explore and summarize your findings.*
 
-For this task, we decided to take first a dive into the data of the transportation. The first question in our mind was: Which transportation is used the most? And next, we would like to know the mean distance per transportation?
+For this task, we decided to take first a dive into the data of the transportation.
+
+The first question in our mind was: Which transportation is used the most?
+And next, we would like to know the mean distance per transportation?
 ```{r}
 # what is the most used transportaition?
 viz_transport <- ggplot(data = data, aes(x = fct_infreq(transport), fill = transport)) +
@@ -53,4 +57,51 @@ viz_distance <- data |>
 viz_transport + viz_distance
 ```
 
-# Task 2
+Now we can see that the ones who travel by train have also the longest distance to travel.
+This seems to make sense since you most likely use the train to travel bigger distances.
+This also tells us that the majority of the students live outside Bern
+and rely therefore on transportation like train and car.
+
+\pagebreak
+Next we ask our self if transportation has any influence on sleep?
+
+```{r fig.width=20, fig.height=10}
+# lets check first for outliers
+viz_box_sleep <- ggplot(data, aes(x = sleep)) +
+  geom_boxplot() +
+  labs(title = 'Distribution of sleep')
+
+# Since the outliers seem realistic, we keep them in our analysis.
+viz_freq_sleep <- data |>
+  aggregate(sleep ~ transport, mean) |>
+  ggplot(aes(
+    x = reorder(transport, sleep, decreasing = TRUE),
+    y = sleep,
+    fill = transport
+  )) +
+  geom_bar(stat = "identity", color = "white", show.legend = FALSE) +
+  labs(title = 'Mean sleep over transportation',
+       x = "Transport",
+       y = "Sleep")
+
+viz_box_sleep + viz_freq_sleep
+```
+
+The ones who walk have most likely the shortest way and can therefore sleep the longest.
+Interesting is the public transportation vs bicycle.
+It seems that the ones with public transportation can sleep longer than the ones by bicycle.
+This does not match with the distance traveled.
+
+\pagebreak
+So let us check the observation with boxplots to check what is happening here:
+```{r fig.height=3}
+ggplot(data, aes(x = transport, y = sleep, fill = transport)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Sleep distribution over transportation",
+       x = "Sleep",
+       y = "Transport")
+```
+
+The sleep distribution on bicycle seems strongly left skewed.
+Therefore, we conclude that this is not representable and needs to be taken with a big grain of salt.
