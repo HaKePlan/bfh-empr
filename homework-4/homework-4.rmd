@@ -105,3 +105,70 @@ ggplot(data, aes(x = transport, y = sleep, fill = transport)) +
 
 The sleep distribution on bicycle seems strongly left skewed.
 Therefore, we conclude that this is not representable and needs to be taken with a big grain of salt.
+
+\pagebreak
+After checking out the transport, distance and sleep, we decided to check out the gender-specific parts in this dataset:
+
+First, we want to know the distribution of gender and class in the dataset. We figured out, that there are six classes represented:
+```{r fig.height=3}
+# There are 6 classes ranging from 29 to 114 students
+viz_class1 <- data %>%
+  ggplot(aes(x=class)) +
+  geom_bar() +
+  labs(title = 'Count per class', x = 'class', y = 'count')
+
+#Gender
+data %>%
+  group_by(gender) %>%
+  count()
+
+#Plot class and gender
+viz_class2 <- data %>%
+  ggplot(aes(x=class, fill = gender)) +
+  geom_bar() +
+  labs(title = 'Count per class split by gender', x = 'class', y = 'count')
+
+viz_class1 + viz_class2
+```
+
+There are significantly more male people in the dataset and just one NB person
+
+Let us understand the height difference between the gender:
+```{r}
+# we take only the gender Female and Male cause non binary is just one Person
+data_gender <- data |>
+  filter(gender %in% c("Female", "Male"))
+
+# eliminate the outlieres
+Data_HW4_filtered <- data_gender %>%
+  group_by(gender) %>%
+  mutate(Q1 = quantile(height, 0.25),
+         Q3 = quantile(height, 0.75),
+         IQR = Q3 - Q1,
+         lower_limit = Q1 - 1.5 * IQR,
+         upper_limit = Q3 + 1.5 * IQR) %>%
+  filter(height >= lower_limit & height <= upper_limit)
+
+# Boxplot height gender
+ggplot(Data_HW4_filtered, aes(x = gender, y = height, fill = gender)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = 'Distribution hight per gender', x = 'height', y = '')
+```
+
+We now understand that at least in the representation of this dataset,
+the female observations are generally smaller than the male counterparts.
+
+\pagebreak
+Let us also have a look at the age distribution regarding gender:
+```{r fig.height=3}
+# Fix dob and make it a date
+data_dob <- data %>%
+  mutate(dob = as.Date(dob))
+
+#People born before 1900 are most likely not alive anymore
+data_dob %>%
+  filter(dob > "1970-01-01") %>%
+  ggplot(aes(x=dob, fill = gender)) +
+  geom_histogram() + labs(title = 'Distribution of age and gender', x = 'Date of birth', y = '')
+```

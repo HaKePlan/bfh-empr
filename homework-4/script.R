@@ -46,6 +46,3 @@ ggplot(data, aes(x = transport, y = sleep, fill = transport)) +
   labs(title = "Sleep distribution over transportation",
        x = "Sleep",
        y = "Transport")
-
-
-
